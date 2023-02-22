@@ -15,6 +15,7 @@ import ballerina/sql;
 # + material - Field Description  
 # + displayPrice - Field Description
 
+# The Product domain object.
 public type Product record {|
     string id;
     string name;
@@ -60,4 +61,17 @@ isolated function getProduct(string id) returns Product|error {
         `SELECT * FROM catalog WHERE id = ${id}`
     );
     return item;
+}
+
+isolated function getAllProducts() returns Product[]|error {
+    Product[] products = [];
+    stream<Product, error?> resultStream = dbClient->query(
+        `SELECT * FROM catalog`
+    );
+    check from Product product in resultStream
+        do {
+            products.push(product);
+        };
+    check resultStream.close();
+    return products;
 }
